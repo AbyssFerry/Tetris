@@ -6,17 +6,17 @@
 #include <fstream>
 #include <iostream>
 
-//#include <Mmsystem.h>
-//#pragma comment(lib, "winmm.lib")
-// 导入音效头文件，不过好像不行
+// #include <Mmsystem.h>
+// #pragma comment(lib, "winmm.lib")
+//  导入音效头文件，不过好像不行
 #include <mmsystem.h>
 #pragma comment(lib, "winmm.lib")
 
 #define MAX_LEVEL 5
 #define RECORDER_FILE "recorder.txt"
 
-//const int SPEED_NORMAL = 500; //ms
-const int SPEED_NORMAL[MAX_LEVEL] = { 500, 300, 150, 100, 80 };
+// const int SPEED_NORMAL = 500; //ms
+const int SPEED_NORMAL[MAX_LEVEL] = {500, 300, 150, 100, 80};
 const int SPEED_QUICK = 30;
 
 Tetris::Tetris(int rows, int cols, int left, int top, int nleft, int ntop, int blockSize)
@@ -36,13 +36,14 @@ Tetris::Tetris(int rows, int cols, int left, int top, int nleft, int ntop, int b
 	this->nextBlock = nullptr;
 
 	// 初始化map
-	for (int i = 0; i < rows; i++) {
+	for (int i = 0; i < rows; i++)
+	{
 		vector<int> mapRow;
-		for (int j = 0; j < cols; j++) {
+		for (int j = 0; j < cols; j++)
+		{
 			mapRow.push_back(0);
 		}
 		map.push_back(mapRow);
-
 	}
 }
 
@@ -51,7 +52,6 @@ void Tetris::init()
 	// 背景音乐
 	mciSendString("open res/bg.mp3", 0, 0, 0);
 	mciSendString("play res/bg.mp3 repeat", 0, 0, 0);
-
 
 	delay = SPEED_NORMAL[0];
 
@@ -69,8 +69,10 @@ void Tetris::init()
 	loadimage(&imgOver, "res/over.png");
 
 	// 初始化游戏区数据
-	for (int i = 0; i < rows; i++) {
-		for (int j = 0; j < cols; j++) {
+	for (int i = 0; i < rows; i++)
+	{
+		for (int j = 0; j < cols; j++)
+		{
 			map[i][j] = 0;
 		}
 	}
@@ -93,11 +95,13 @@ void Tetris::init()
 
 	// 导入最高分
 	ifstream file(RECORDER_FILE);
-	if (!file.is_open()) {
+	if (!file.is_open())
+	{
 		cout << RECORDER_FILE << "打开失败" << endl;
 		highestScore = 0;
 	}
-	else {
+	else
+	{
 		file >> highestScore;
 	}
 	file.close();
@@ -107,15 +111,16 @@ void Tetris::play()
 {
 	init();
 
-
 	int timer = 0;
-	while (1) {
+	while (1)
+	{
 		// 接受用户输入
 		keyEvent();
 
-		//设置刷新间隔
+		// 设置刷新间隔
 		timer += getDelay();
-		if (timer > delay) {
+		if (timer > delay)
+		{
 			timer = 0;
 
 			// 方块下降
@@ -130,7 +135,8 @@ void Tetris::play()
 		}
 
 		// 判断游戏是否结束
-		if (gameOver) {
+		if (gameOver)
+		{
 			// 保存分数
 			saveScore();
 
@@ -142,83 +148,53 @@ void Tetris::play()
 			init();
 		}
 
-		if (update) {
+		if (update)
+		{
 			update = false;
 			// 渲染游戏画面
 			updateWindow();
 
 			// 更新游戏数据
-
 		}
-
-
-
 	}
 }
-
 
 // 终端必须在上层才可以读取键盘输入， 后期优化 @@
 void Tetris::keyEvent()
 {
-	unsigned char ch;
-
-	// kbhit()只有用于输入了才为真
-	if (_kbhit())
+	ExMessage msg;
+	while (peekmessage(&msg, EX_KEY))
 	{
-		// 直接读取用户输入（不用回车）
-		ch = _getch();
-
-
-		// 是否执行旋转
-		bool rotateFlag = false;
-
-		// 移动偏量
-		int dx = 0;
-
-		// 用户按下方向键会返回两个字符
-		// 如果按下 向上方向键，会先后返回：224 72
-		// 如果按下 向下方向键，会先后返回：224 80
-		// 如果按下 向左方向键，会先后返回：224 75
-		// 如果按下 向右方向键，会先后返回：224 77
-
-		if (ch == 224) {
-			ch = _getch();
-			switch (ch) {
-			case 72:
-				rotateFlag = true;
+		if (msg.message == WM_KEYDOWN)
+		{
+			switch (msg.vkcode)
+			{
+			case VK_LEFT:
+				moveLeftRight(-1);
+				update = true;
 				break;
-			case 80:
-				delay = SPEED_QUICK;
+			case VK_RIGHT:
+				moveLeftRight(1);
+				update = true;
 				break;
-			case 75:
-				dx = -1;
-				break;
-			case 77:
-				dx = 1;
-				break;
-			default:
-				break;
-			}
-
-			if (rotateFlag) {
+			case VK_UP:
 				rotate();
 				update = true;
-			}
-
-			if (dx != 0) {
-				moveLeftRight(dx);
+				break;
+			case VK_DOWN:
+				delay = SPEED_QUICK;
+				break;
+			case VK_SPACE:
+				pause();
 				update = true;
+				break;
+			case 'I':
+				cheat_getStrip();
+				update = true;
+				break;
 			}
-		}
-		else if(ch == 32) {
-			pause();
-			update = true;
-		}
-		else if(ch == 'I'){
-			cheat_getStrip();
 		}
 	}
-
 }
 
 void Tetris::updateWindow()
@@ -227,22 +203,24 @@ void Tetris::updateWindow()
 	putimage(0, 0, &imgBg);
 
 	// 获得map里面数值所对应的方块类型
-	IMAGE** ings = Block::getImage();
+	IMAGE **ings = Block::getImage();
 
 	// 开始画一批
 	BeginBatchDraw();
 
 	// 绘制已经固化的方块
-	for (int i = 0; i < rows; i++) {
+	for (int i = 0; i < rows; i++)
+	{
 		;
-		for (int j = 0; j < cols; j++) {
-			if (map[i][j] == 0) continue;
+		for (int j = 0; j < cols; j++)
+		{
+			if (map[i][j] == 0)
+				continue;
 			int x = j * blockSize + leftMargin;
 			int y = i * blockSize + topMargin;
 			putimage(x, y, ings[map[i][j] - 1]);
 		}
 	}
-
 
 	// 绘制当前和预告方块
 	curBlock->draw(leftMargin, topMargin);
@@ -251,7 +229,7 @@ void Tetris::updateWindow()
 	// 绘制分数
 	drawScore();
 
-	//输出画的全部
+	// 输出画的全部
 	EndBatchDraw();
 }
 
@@ -262,11 +240,13 @@ unsigned long long Tetris::getDelay()
 	static unsigned long long lastTime = 0;
 	unsigned long long currentTime = GetTickCount();
 
-	if (lastTime == 0) {
+	if (lastTime == 0)
+	{
 		lastTime = currentTime;
 		return 0;
 	}
-	else {
+	else
+	{
 		unsigned long long ret = currentTime - lastTime;
 		lastTime = currentTime;
 		return ret;
@@ -278,14 +258,14 @@ void Tetris::drop()
 	bakBlock = *curBlock;
 	curBlock->drop();
 
-	if (!curBlock->blockInMap(map)) {
+	if (!curBlock->blockInMap(map))
+	{
 		// 固化方块
 		bakBlock.solidify(map);
 
 		delete curBlock;
 		curBlock = nextBlock;
 		nextBlock = new Block;
-
 	}
 
 	// 按了 向下方向键后要恢复速度
@@ -298,24 +278,30 @@ void Tetris::clearLine()
 	int fullLines = 0;
 
 	int k = rows - 1;
-	for (int i = rows - 1; i >= 0; i--) {
+	for (int i = rows - 1; i >= 0; i--)
+	{
 		// 检测i行是否满行
 		int count = 0;
-		for (int j = 0; j < cols; j++) {
-			if (map[i][j]) count++;
+		for (int j = 0; j < cols; j++)
+		{
+			if (map[i][j])
+				count++;
 			// 边读边存
 			map[k][j] = map[i][j];
 		}
 		// 行没满
-		if (count < cols) {
+		if (count < cols)
+		{
 			k--;
 		}
-		else {
+		else
+		{
 			fullLines++;
 		}
 	}
 
-	if (fullLines > 0) {
+	if (fullLines > 0)
+	{
 
 		// 加分, 消除的行平方乘十
 		score += fullLines * fullLines * 10;
@@ -323,10 +309,10 @@ void Tetris::clearLine()
 		// 播放音效，头文件用不了
 		mciSendString("play res/xiaochu1.mp3", 0, 0, 0);
 
-
 		// 每100分一个级别 101-200第二关
 		level = (score + 99) / 100;
-		if (level > 5) {
+		if (level > 5)
+		{
 			gameOver = true;
 		}
 
@@ -341,7 +327,8 @@ void Tetris::moveLeftRight(int offset)
 	curBlock->moveLeftRight(offset);
 
 	// 越界检测
-	if (!curBlock->blockInMap(map)) {
+	if (!curBlock->blockInMap(map))
+	{
 
 		// 复原
 		*curBlock = bakBlock;
@@ -351,13 +338,15 @@ void Tetris::moveLeftRight(int offset)
 void Tetris::rotate()
 {
 	// 如果是田方块旋转没有意义
-	if (curBlock->getBlockType() == 7) return;
+	if (curBlock->getBlockType() == 7)
+		return;
 
 	bakBlock = *curBlock;
 	curBlock->rotate();
 
 	// 越界检测
-	if (!curBlock->blockInMap(map)) {
+	if (!curBlock->blockInMap(map))
+	{
 
 		// 复原
 		*curBlock = bakBlock;
@@ -369,7 +358,6 @@ void Tetris::drawScore()
 	// 看不懂
 	char scoreText[32];
 	sprintf_s(scoreText, sizeof(scoreText), "%d", score);
-
 
 	setcolor(RGB(180, 180, 180));
 
@@ -411,7 +399,8 @@ void Tetris::checkOver()
 
 void Tetris::saveScore()
 {
-	if (score > highestScore) {
+	if (score > highestScore)
+	{
 		highestScore = score;
 		ofstream file(RECORDER_FILE);
 		file << highestScore;
@@ -424,27 +413,33 @@ void Tetris::displayOver()
 	mciSendString("stop res/bg.mp3", 0, 0, 0);
 
 	// 绘制胜利失败图片
-	if (level <= MAX_LEVEL) {
+	if (level <= MAX_LEVEL)
+	{
 
 		putimage(262, 361, &imgOver);
 		mciSendString("play res/over.mp3", 0, 0, 0);
 	}
-	else {
+	else
+	{
 		putimage(262, 361, &imgWin);
-		mciSendString("play res/win.mp3", 0, 0, 0);		
+		mciSendString("play res/win.mp3", 0, 0, 0);
 	}
 }
 
 void Tetris::pause()
 {
-	// 等待读取到空格就结束
-	while(1) {
-		if(_getch() == 32) return;
+	ExMessage msg;
+	while (true)
+	{
+		if (peekmessage(&msg, EX_KEY) && msg.message == WM_KEYDOWN && msg.vkcode == VK_SPACE)
+		{
+			return;
+		}
+		Sleep(10);
 	}
 }
 
 void Tetris::cheat_getStrip()
 {
 	nextBlock->_cheat_changeType(1);
-	
 }
