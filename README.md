@@ -81,3 +81,5 @@ cpp-tetris/
 
 - ​**​AbyssFerry​**​ - 项目发起者 & 核心开发者  
   [![GitHub](https://img.shields.io/badge/GitHub-@AbyssFerry-blue)](https://github.com/AbyssFerry)
+- **学习视频** - 基础框架和图片资源  
+  [![Bilibili](https://img.shields.io/badge/Bilibili-经典俄罗斯方块游戏-orange)](https://www.bilibili.com/video/BV1ia411K7AE/?share_source=copy_web&vd_source=dafdbe9349f351eda94a4049eec75e25)
