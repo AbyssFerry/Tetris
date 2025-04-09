@@ -33,22 +33,22 @@
 ```bash
 # 克隆仓库
 git clone https://github.com/AbyssFerry/cpp-tetris.git
-cd cpp-tetris
+cd Tetris
 
-# 安装依赖
+# 安装依赖（项目自带无需安装）
 # 1. 从EasyX官网下载安装包
 # 2. 将 include/easyx.h 和 lib/libeasyx.a 放入项目对应目录
 
 # 编译项目
-make
+make all
 
 # 运行游戏
-make run
+./game.exe
 ```
 
 ### 使用预编译版本
 
-1. 前往 [Releases 页面](https://github.com/AbyssFerry/cpp-tetris/releases) 下载最新版
+1. 前往 [Releases 页面](https://github.com/AbyssFerry/Tetris/releases) 下载最新版
 2. 解压后直接运行 `game.exe`
 3. 确保 `res` 文件夹与可执行文件同级
 
